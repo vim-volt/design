@@ -1,0 +1,216 @@
+h1. 概要
+
+Vim script レイヤ (volt.vim) と Go レイヤに分かれる。
+
+Vim script レイヤは curl コマンドで Go レイヤを GitHub releases からダウンロードする。
+なるべく依存関係を少なくするため git コマンドは使わない。
+できたらダウンロードは何も入れずに行えるのがベター (設計については「Vim script レイヤ (volt.vim)」「設計」の項を参照)。
+netrw の機能を使って @:so https://raw.githubusercontent.com/vim-volt/vim-volt/master/bootstrap.vim@ とすれば「volt コマンドのインストール」と「volt.vim のインストール」を行うこともできる。
+
+Go レイヤは "src-d/go-git":https://github.com/src-d/go-git を使って git clone などを行う。
+
+
+h1. Vim script レイヤ (volt.vim)
+
+h2. 設計
+
+* 「volt.vim のダウンロードは何も入れずに行えるのがベター」
+** Windows では "Powershell の機能":https://github.com/thinca/vim-themis/issues/31#issuecomment-198952184 などを使い、その他の環境では perl(LWP::Simple), curl, wget などを使い分ける
+
+* 「netrw の機能を使って ～ 「volt コマンドのインストール」と「volt.vim のインストール」を行うこともできる」 (この場合は curl が必要？ (netrw が使うため？))
+## bootstrap.vim が netrw によってダウンロードされ実行される
+## @$VOLTPATH@ ディレクトリが作られる
+*** @$VOLTPATH@ はデフォルトで @$HOME/volt@。変える場合は事前に @$VOLTPATH@ を定義しておく
+## "Powershell の機能":https://github.com/thinca/vim-themis/issues/31#issuecomment-198952184, perl(LWP::Simple), curl, wget などを使って volt コマンドを @$VOLTPATH/bin/volt@ にダウンロードする
+## volt コマンドを使ってリポジトリごと volt.vim を @$VOLTPATH/repos/github.com/vim-volt/vim-volt@ にダウンロードする
+## 新しいバッファが作られ初期設定のガイドが表示される (「vimrc の設定」を参照)
+
+* volt.vim は volt コマンドのバージョン (MAJOR.MINOR.PATCH) を持つ
+** 将来は volt コマンドは volt コマンドの MAJOR.MINOR だけ指定して最新版を取得するようにしたい
+** どうやって最新版のダウンロード URL を特定する？
+*** @{MAJOR}.{MINOR}-latest@ のようなタグを MAJOR.MINOR 以下で常に最新の PATCH を指すようにする？
+** どうやってリモートの最新版を特定する？
+*** @{MAJOR}.{MINOR}-latest@ のリリースに @LATEST@ のようなファイルを置く？
+
+* job で外部コマンド (volt) を叩く
+** @:VoltGet@ で外部コマンド @volt get@ を叩く感じ
+* volt コマンドをインストールする
+** GOOS と GOARCH を特定して @$HOME/volt/bin@ (@$VOLTPATH/bin@) に @volt@ コマンドのバイナリをインストール
+* volt コマンドを初回に実行する前に volt コマンドのバージョンを調べ、volt.vim と非互換だった場合にアップグレード or ダウングレードする
+
+* vivo.vim も持っていた Vim プラグインごとの設定ファイル (plugconf)
+** ファイルは @$VOLTPATH/plugconf/{site}/{user}/{name}.vim@ に置く
+** vivo.vim では @vivo#plugconf#load()@ を直接呼ぶ必要があった
+** volt.vim では本体にインテグレートした扱いにしたい
+** 設定ファイルには @set rtp+={volt.vim}@ と @call volt#load()@ を呼ぶだけでいいようにしたい
+*** 「volt.vim 関連の vimrc の設定」を参照
+
+* @:VoltGet@ の -i (--install) オプション
+** volt コマンドにはない
+** volt.lock に記載があるがインストールされていない Vim プラグインを fetch する
+** リポジトリが指定された場合は @:VoltGet {repository}@ と同じ
+
+h2. vimrc の設定
+
+<pre>
+set rtp+=$HOME/volt/repos/github.com/vim-volt/vim-volt
+
+" * lock.json の active_profile / profiles[] から取得した Vim プラグインをロードする
+" * プラグインの rtp の追加 ($HOME/.vim 以下にまとめて配置するなら不要)
+" * plugconf のロード (これもまとめて $HOME/.vim 以下に配置できる？)
+" * :filetype plugin indent on は？
+call volt#load()
+</pre>
+
+* なるべく記載を少なくシンプルにしたい。
+GitHub の README.md を見た人が「こんなシンプルなら使ってみたい」となるような短さがいい
+
+* 既存の vimrc はなるべく @$VOLTPATH/rc/init.vim@ に移動してもらう
+** これは後述の profile 機能を使うためには既存の vimrc の設定が邪魔になることがあるため
+
+* volt.lock に記載があるがインストールされていない Vim プラグインを fetch するのはユーザ側で @:VoltFetch -a@ させる
+
+
+h2. Ex コマンド
+
+基本的に volt コマンドのサブコマンドと一対一になっている。
+例外としては「Vim script レイヤ (volt.vim) がやること」でも触れた @:VoltGet -i@ など。
+
+* :VoltConfig
+## @volt config@ を実行
+
+* :VoltGet
+## -i オプションが指定されたら volt.lock から Vim プラグインのリストを取得する
+## -i オプションが指定されなかったら引数から Vim プラグインのリストを取得する
+## Vim プラグインのリストのそれぞれに対して
+### @volt get@ を実行
+### なければ rtp にインストールした Vim プラグインを追加し、@:so {repository}/plugin/**/*.vim@ する
+### @volt plugconf ping@ を実行
+### plugconf が存在するなら "Recommended plugconf found. Do you install it? [Y/n]:" とプロンプトを表示
+#### yes か空エンターが入力されたら
+ @volt plugconf get@ を実行
+## すでにインストールされていたプラグインがあった場合、以下のようにバッファに表示
+*** "[WARN] Reloading upgraded plugin is not supported."
+*** "[WARN] Please restart your Vim to reload the following plugins:"
+*** すでにインストールされていたプラグインのリスト
+
+* :VoltRm
+## @volt rm@ を実行
+## rtp から削除した Vim プラグインを削除
+## plugconf の rm フックを実行
+
+* :VoltQuery
+## @volt query@ を実行
+## 新しいバッファを開いて出力結果を表示
+
+* :VoltHelptags [-a] [{repository}] ({repository} の書式は @volt get@ と同じ)
+## -a オプションが指定されたら volt.lock から Vim プラグインのリストを取得する
+## -a オプションが指定されなかったら引数から Vim プラグインのリストを取得する
+## Vim プラグインのリストのそれぞれに対して
+### @:helptags {repository}@ を実行
+
+* :VoltProfile [{profile name}] (「profile 機能」を参照)
+## {profile name} が指定されたら
+### lock.json の active_profile をセットする
+### "[INFO] Please start Vim to load" {profile name} "profile" と表示
+## {profile name} が指定されなかったら現在の profile を表示
+
+h2. profile 機能
+
+読み込む Vim プラグインのセットを決められる。
+デフォルトは default profile。
+@:VoltProfile@ コマンドで切り替えられる。
+
+lock.json の load_init フラグと合わせて完全な sandbox 環境を作ることができる (○○プラグインと☓☓プラグインを組み合わせてまっさらな vimrc(init.vim) で起動する)。
+
+h2. filetype や コマンド実行時に初めて Vim スクリプトファイルを読み込む (遅延ロード機能)
+
+dein.vim には @on_ft@ と @on_cmd@ があるようだ。
+
+plugconf と lock.json どちらに指定可能にするべきか？
+
+(TODO)
+
+
+h1. Go レイヤ (volt コマンド)
+
+h2. 設計
+
+* Semantic Versioning に則ったバージョン番号にする
+* 設定ファイル (JSON) を持つ
+** @$HOME/volt/config@
+* Vim プラグインリポジトリの git clone 先について
+** @$HOME/volt/repos/{site}/{user}/{name}@
+** @$HOME/.vim@ ディレクトリ以下の方がいいか？
+*** 設定 (@$VOLTPATH@) で @$HOME/.vim@ 以下にすることもできる
+
+h2. サブコマンド
+
+* volt config [--global] {key} [{value}]
+** git config のように設定ファイルから読み込んだり書き込んだり
+** 現時点では --global が指定されなければエラー (未実装)
+
+* volt get [-u] {repository}
+** リポジトリが指す Vim プラグインをインストール・アップグレードする
+*** -u オプション：既存 Vim プラグインをアップグレード (初回インストール時は無視)
+** repository の書式
+*** github.com/user/name -> https://github.com/user/name
+*** user/name -> https://github.com/user/name
+*** https://github.com/user/name
+**** private repository アクセス時の ssh のプロンプトをどうやって回避する？
+**** go get はどうしてる？
+*** git@github.com:user/name.git
+**** ssh のプロンプトをどうやって回避する？
+**** go get に倣ってこの書式は受け付けないようにすればいいのでは？
+
+* volt rm [-p] {repository}
+** Vim プラグインをアンインストールする
+** {repository} の書式は @volt get@ と同じ
+** -p オプション：plugconf も削除する (指定されなければ削除しない)
+
+* volt query [--json] [--installed] [{repository}]
+** Vim プラグインに関する情報を標準出力に出力する
+** {repository} の書式は @volt get@ と同じ
+** もし {repository} がインストール済みのものでなければリモートの情報を表示 (もちろんインストールはしない)
+*** 現時点では必要ないが、検索にも使えるようにしたいため
+** --json オプション：JSON で出力
+*** どうせ volt.vim からしか使わないのなら JSON 出力をデフォルトにしてもいいかもしれない
+** --installed オプション：インストールされている Vim プラグイン全てを対象とする
+
+* volt plugconf ping {repository}
+** plugconf ファイルが
+ https://github.com/vim-volt/plugconf-templates リポジトリに存在するかだけチェックする (通知方法はステータスコード？標準出力？)
+
+* volt plugconf get {repository}
+** https://github.com/vim-volt/plugconf-templates のリポジトリからオススメ plugconf を取得して
+ plugconf のディレクトリに保存する
+
+h2. $HOME/volt/lock.json の項目
+
+基本は go コマンドのようにシンプルにしたいが、ロック機能は付けたい。
+@$VOLTPATH/repos/{user}/{name}@ に cd して開発する場合も考える。
+開発する時にまた git checkout するのが面倒なので (vivo.vim ではそうしていたが) volt get した時点で @git checkout@ することはない。
+上と同じ理由で branch の情報はいらない。
+
+項目は glide.lock を参考にしている。
+
+* active_profile
+** 現在アクティブな profile 名
+* load_init
+** @$VOLTPATH/rc/init.vim@ を読み込むかどうかのフラグ
+* repos[]
+** Vim プラグイン情報のリスト
+* repos[]/path
+** スキーマ (@https://@) なしの URL (@$VOLTPATH/repos/{path}@ の path 部分とも言える)
+* repos[]/version
+** Git のコミットハッシュ
+* repos[]/active
+** Vim プラグインを rtp に追加するか否かのフラグ
+* profiles[]
+** 「profile 機能」を参照
+* profiles[]/name
+** profile 名
+* profiles[]/path
+** 読み込む Vim プラグインのスキーマ (@https://@) なしの URL
+* profiles[]/load_init
+** @$VOLTPATH/rc/init.vim@ を読み込むかどうかのフラグ
