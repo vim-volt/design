@@ -70,9 +70,6 @@ h2. Ex コマンド
 
 基本的に volt コマンドのサブコマンドと一対一になっている。
 
-* :VoltConfig
-## @volt config@ を実行
-
 * :VoltGet
 ## @volt get@ を実行
 ## lock.json ファイルの trx_id と repos[]/trx_id が一致する Vim プラグインのリストを取得し、それぞれに対し以下を実行
@@ -85,6 +82,8 @@ h2. Ex コマンド
 
 * :VoltRm
 ## @volt rm@ を実行
+## リポジトリのディレクトリが存在する場合エラーを表示
+*** "[ERROR] Repository could not be deleted: " {repos}
 ## rtp から削除した Vim プラグインを削除
 ## plugconf の rm フックを実行
 
@@ -165,10 +164,6 @@ lock.json に書き込む時にはロックファイルを作り、自身の PID
 この図の A のように書き込みが先でも「書き込み」「読み出し」を先に終えた B がトランザクションを獲得する。
 
 h2. サブコマンド
-
-* volt config [--global] {key} [{value}]
-** git config のように設定ファイルから読み込んだり書き込んだり
-** 現時点では --global が指定されなければエラー (未実装)
 
 * volt get [-u] {repository}
 ** リポジトリが指す Vim プラグインをインストール・アップデートする
