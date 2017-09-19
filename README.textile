@@ -138,11 +138,11 @@ h2. 設計
 
 * Semantic Versioning に則ったバージョン番号にする
 * 設定ファイル (JSON) を持つ
-** @$HOME/volt/config@
+** @$HOME/volt/lock.json@
 * Vim プラグインリポジトリの git clone 先について
 ** @$HOME/volt/repos/{site}/{user}/{name}@
 ** @$HOME/.vim@ ディレクトリ以下の方がいいか？
-*** 設定 (@$VOLTPATH@) で @$HOME/.vim@ 以下にすることもできる
+*** 設定 (@$VOLTPATH@) で @$HOME/.vim@ 以下にすることもできる？(推奨はしないかもしれない)
 
 h2. サブコマンド
 
