@@ -62,7 +62,7 @@ set rtp+=$HOME/volt/repos/github.com/vim-volt/vim-volt
 call volt#load()
 </pre>
 
-* なるべく記載を少なくシンプルにしたい。
+* なるべく記載を少なくシンプルにしたい
 GitHub の README.md を見た人が「こんなシンプルなら使ってみたい」となるような短さがいい
 
 * 既存の vimrc はなるべく @$VOLTPATH/rc/init.vim@ に移動してもらう
@@ -74,7 +74,7 @@ GitHub の README.md を見た人が「こんなシンプルなら使ってみ�
 h2. Ex コマンド
 
 基本的に volt コマンドのサブコマンドと一対一になっている。
-例外としては「Vim script レイヤ (volt.vim) がやること」でも触れた @:VoltGet -i@ など。
+例外としては「設計」でも触れた @:VoltGet -i@ など。
 
 * :VoltConfig
 ## @volt config@ を実行
