@@ -113,6 +113,10 @@ h2. plugconf
 
 hook については "dein.vim の hook":http://qiita.com/delphinus/items/cd221a450fd23506e81a も参考のこと。
 
+h2. plugconf-templates リポジトリ
+
+(TODO)
+
 h2. profile 機能
 
 読み込む Vim プラグインのセットを決められる。
