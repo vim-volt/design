@@ -110,10 +110,15 @@ h2. Ex コマンド
 ### @:helptags {repository}@ を実行
 
 * :VoltProfile [{profile name}] (「profile 機能」を参照)
-## {profile name} が指定されたら
-### lock.json の active_profile をセットする
-### "[INFO] Please start Vim to load" {profile name} "profile" と表示
-## {profile name} が指定されなかったら現在の profile を表示
+## @volt profile@ を実行
+
+* :VoltEdit [{glob} ...] (oldsearch.vim の :OldSearch の様なコマンド)
+## $VOLTPATH 以下の rc, plugconf ディレクトリ以下からファイルのリストを再帰的に取得
+## ファイルのリストを指定された glob で絞り込む
+## ファイルのリストが 0 個だったらエラーメッセージ
+## ファイルのリストが 1 個だったらそれを開く
+## ファイルのリストが 2個以上だったら選択肢を出す
+### 選択したら開く
 
 h2. profile 機能
 
@@ -187,6 +192,12 @@ h2. サブコマンド
 * volt plugconf get {repository}
 ** https://github.com/vim-volt/plugconf-templates のリポジトリからオススメ plugconf を取得して
  plugconf のディレクトリに保存する
+
+* volt profile [{profile name}]
+## {profile name} が指定されたら
+### lock.json の active_profile をセットする
+### "[INFO] Please start Vim to load" {profile name} "profile" と表示
+## {profile name} が指定されなかったら現在の profile を表示
 
 h2. $HOME/volt/lock.json の項目
 
