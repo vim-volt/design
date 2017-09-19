@@ -99,7 +99,7 @@ h2. Ex コマンド
 * :VoltProfile [{profile name}] (「profile 機能」を参照)
 ## @volt profile@ を実行
 
-* :VoltEdit [{glob} ...] (oldsearch.vim の :OldSearch の様なコマンド)
+* :VoltEdit [{glob} ...] (oldfilesearch.vim の :OldFileSearch の様なコマンド)
 ## $VOLTPATH 以下の rc, plugconf ディレクトリ以下からファイルのリストを再帰的に取得
 ## ファイルのリストを指定された glob で絞り込む
 ## ファイルのリストが 0 個だったらエラーメッセージ
