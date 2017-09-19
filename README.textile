@@ -151,6 +151,24 @@ h2. 設計
 ** @$HOME/volt/repos/{site}/{user}/{name}@
 ** @$HOME/.vim@ ディレクトリ以下の方がいいか？
 *** 設定 (@$VOLTPATH@) で @$HOME/.vim@ 以下にすることもできる？(推奨はしないかもしれない)
+* lock.json に書き込む時にはトランザクションと呼ばれる動作を行い同時に lock.json に書き込んでしまい内容を失うことがないようにする (「トランザクション」を参照)
+
+h2. トランザクション
+
+トランザクションの直前にロックファイルの存在確認を行い、存在すれば "[ERROR] trx.lock exists. If process is already dead, please execute 'volt trx rm'" と表示する (これは「トランザクション」の動作には含まれない)。
+
+lock.json に書き込む時にはロックファイルを作り、自身の PID を書き込む。
+その後すぐにファイルの内容を読み出し、自身の PID が読み出せればトランザクションを開始してよい。
+ファイルの内容が違っていたり、すでにファイルが作られていたらトランザクションは失敗する (コマンドはエラー終了する)。
+
+以下にトランザクションの例を示す。
+
+# A 書き込み
+# B 書き込み
+# B 読み出し (自身の PID が読み出せたので続行)
+# A 書き込み (自身の PID ではなかったためエラー終了)
+
+この図の A のように書き込みが先でも「書き込み」「読み出し」を先に終えた B がトランザクションを獲得する。
 
 h2. サブコマンド
 
@@ -199,6 +217,15 @@ h2. サブコマンド
 ### "[INFO] Please start Vim to load" {profile name} "profile" と表示
 ## {profile name} が指定されなかったら現在の profile を表示
 
+* volt trx rm [-f]
+## ロックファイルから内容を読み出す
+### ファイルが存在しないとのエラーが起きたら正常終了
+## "go-ps":https://github.com/mitchellh/go-ps ライブラリを用いてロックファイルに書き込まれたプロセスが生きているか確認する
+## 生きていて -f オプションが指定されなかった場合は
+### "[ERROR] The process is running. Please re-run with -f option if you want to remove 'trx.lock' forcefully" とエラーを表示
+## それ以外の場合は
+### trx.lock を削除する
+
 h2. $HOME/volt/lock.json の項目
 
 基本は go コマンドのようにシンプルにしたいが、ロック機能は付けたい。
@@ -208,6 +235,8 @@ h2. $HOME/volt/lock.json の項目
 
 項目は glide.lock を参考にしている。
 
+* trx_id
+** 前回行われたトランザクション (lock.json ファイル書き込み) の ID
 * active_profile
 ** 現在アクティブな profile 名
 * load_init
@@ -220,6 +249,8 @@ h2. $HOME/volt/lock.json の項目
 ** Git のコミットハッシュ
 * repos[]/active
 ** Vim プラグインを rtp に追加するか否かのフラグ
+* repos[]/trx_id
+** 記載のトランザクションの時にインストールされたことを示す ID
 * profiles[]
 ** 「profile 機能」を参照
 * profiles[]/name
