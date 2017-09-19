@@ -45,11 +45,6 @@ h2. 設計
 ** 設定ファイルには @set rtp+={volt.vim}@ と @call volt#load()@ を呼ぶだけでいいようにしたい
 *** 「volt.vim 関連の vimrc の設定」を参照
 
-* @:VoltGet@ の -i オプション
-** volt コマンドにはない
-** volt.lock に記載があるがインストールされていない Vim プラグインを fetch する
-** リポジトリが指定された場合は @:VoltGet {repository}@ と同じ
-
 h2. vimrc の設定
 
 <pre>
@@ -74,25 +69,19 @@ GitHub の README.md を見た人が「こんなシンプルなら使ってみ�
 h2. Ex コマンド
 
 基本的に volt コマンドのサブコマンドと一対一になっている。
-例外としては「設計」でも触れた @:VoltGet -i@ など。
 
 * :VoltConfig
 ## @volt config@ を実行
 
 * :VoltGet
-## -i オプションが指定されたら volt.lock から Vim プラグインのリストを取得する
-## -i オプションが指定されなかったら引数から Vim プラグインのリストを取得する
-## Vim プラグインのリストのそれぞれに対して
-### @volt get@ を実行
-### なければ rtp にインストールした Vim プラグインを追加し、<notextile>:so {repository}/plugin/**/*.vim</notextile> する
-### @volt plugconf ping@ を実行
-### plugconf が存在するなら "Recommended plugconf found. Do you install it? [Y/n]:" とプロンプトを表示
-#### yes か空エンターが入力されたら
- @volt plugconf get@ を実行
-## すでにインストールされていたプラグインがあった場合、以下のようにバッファに表示
-*** "[WARN] Reloading upgraded plugin is not supported."
-*** "[WARN] Please restart your Vim to reload the following plugins:"
-*** すでにインストールされていたプラグインのリスト
+## @volt get@ を実行
+## lock.json ファイルの trx_id と repos[]/trx_id が一致する Vim プラグインのリストを取得し、それぞれに対し以下を実行
+### もし rtp になければ
+#### rtp に追加
+#### @:so plugin/**/*.vim@ を実行
+### @:helptags doc@ を実行
+### @:so {plugconf}@ を実行
+### plugconf の hook_post_update を実行
 
 * :VoltRm
 ## @volt rm@ を実行
@@ -101,7 +90,6 @@ h2. Ex コマンド
 
 * :VoltQuery
 ## @volt query@ を実行
-## 新しいバッファを開いて出力結果を表示
 
 * :VoltHelptags [-a] [{repository}] ({repository} の書式は @volt get@ と同じ)
 ## -a オプションが指定されたら volt.lock から Vim プラグインのリストを取得する
@@ -119,6 +107,12 @@ h2. Ex コマンド
 ## ファイルのリストが 1 個だったらそれを開く
 ## ファイルのリストが 2個以上だったら選択肢を出す
 ### 選択したら開く
+
+h2. plugconf
+
+(TODO)
+
+hook については "dein.vim の hook":http://qiita.com/delphinus/items/cd221a450fd23506e81a も参考のこと。
 
 h2. profile 機能
 
@@ -177,17 +171,32 @@ h2. サブコマンド
 ** 現時点では --global が指定されなければエラー (未実装)
 
 * volt get [-u] {repository}
-** リポジトリが指す Vim プラグインをインストール・アップグレードする
-*** -u オプション：既存 Vim プラグインをアップグレード (初回インストール時は無視)
+** リポジトリが指す Vim プラグインをインストール・アップデートする
+** -i オプション：volt.lock に記載の Vim プラグインのリストを使用する (引数が指定された場合エラーとなる)
+** -u オプション：既存の Vim プラグインをアップデート (初回インストール時は無視)
+** -i と -u が同時に指定された場合は全てのリポジトリをアップデート
 ** repository の書式
 *** github.com/user/name -> https://github.com/user/name
 *** user/name -> https://github.com/user/name
 *** https://github.com/user/name
 **** private repository アクセス時の ssh のプロンプトをどうやって回避する？
 **** go get はどうしてる？
-*** git@github.com:user/name.git
-**** ssh のプロンプトをどうやって回避する？
-**** go get に倣ってこの書式は受け付けないようにすればいいのでは？
+** 詳細設計
+### -i オプションが指定されたら volt.lock から Vim プラグインのリストを取得する
+### -i オプションが指定されなかったら引数から Vim プラグインのリストを取得する
+### Vim プラグインのリストのそれぞれに対して以下を実行
+#### リポジトリが dirty な場合はエラーを出力して終了
+#### -u オプションが未指定でリポジトリが存在したらエラーを出力して終了
+### Vim プラグインのリストのそれぞれに対して以下を実行
+#### リポジトリを一時ディレクトリに clone
+#### HEAD が違う場合は
+##### リポジトリを一時ディレクトリから @$VOLTPATH/repos/{site}/{user}/{name}@ に移動
+##### @volt plugconf get@ を実行
+### リポジトリが移動され @volt plugconf get@ が実行された Vim プラグインを変更して lock.json に書き込む
+### すでにインストールされていたプラグインがあった場合、以下のように表示
+**** "[WARN] Reloading upgraded plugin is not supported."
+**** "[WARN] Please restart your Vim to reload the following plugins:"
+**** すでにインストールされていたプラグインのリスト
 
 * volt rm [-p] {repository}
 ** Vim プラグインをアンインストールする
@@ -203,13 +212,9 @@ h2. サブコマンド
 *** どうせ volt.vim からしか使わないのなら JSON 出力をデフォルトにしてもいいかもしれない
 ** --installed オプション：インストールされている Vim プラグイン全てを対象とする
 
-* volt plugconf ping {repository}
-** plugconf ファイルが
- https://github.com/vim-volt/plugconf-templates リポジトリに存在するかだけチェックする (通知方法はステータスコード？標準出力？)
-
 * volt plugconf get {repository}
-** https://github.com/vim-volt/plugconf-templates のリポジトリからオススメ plugconf を取得して
- plugconf のディレクトリに保存する
+** https://github.com/vim-volt/plugconf-templates のリポジトリから標準 plugconf を取得して plugconf のディレクトリに保存する
+** plugconf がすでにインストールされていたら "[WARN]" {plugconf} "was already installed ... skip" と表示
 
 * volt profile [{profile name}]
 ## {profile name} が指定されたら
