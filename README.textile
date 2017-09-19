@@ -45,7 +45,7 @@ h2. 設計
 ** 設定ファイルには @set rtp+={volt.vim}@ と @call volt#load()@ を呼ぶだけでいいようにしたい
 *** 「volt.vim 関連の vimrc の設定」を参照
 
-* @:VoltGet@ の -i (--install) オプション
+* @:VoltGet@ の -i オプション
 ** volt コマンドにはない
 ** volt.lock に記載があるがインストールされていない Vim プラグインを fetch する
 ** リポジトリが指定された場合は @:VoltGet {repository}@ と同じ
@@ -68,7 +68,7 @@ GitHub の README.md を見た人が「こんなシンプルなら使ってみ�
 * 既存の vimrc はなるべく @$VOLTPATH/rc/init.vim@ に移動してもらう
 ** これは後述の profile 機能を使うためには既存の vimrc の設定が邪魔になることがあるため
 
-* volt.lock に記載があるがインストールされていない Vim プラグインを fetch するのはユーザ側で @:VoltFetch -a@ させる
+* volt.lock に記載があるがインストールされていない Vim プラグインを fetch するのはユーザ側で @:VoltGet -i@ させる
 
 
 h2. Ex コマンド
@@ -84,7 +84,7 @@ h2. Ex コマンド
 ## -i オプションが指定されなかったら引数から Vim プラグインのリストを取得する
 ## Vim プラグインのリストのそれぞれに対して
 ### @volt get@ を実行
-### なければ rtp にインストールした Vim プラグインを追加し、@:so {repository}/plugin/**/*.vim@ する
+### なければ rtp にインストールした Vim プラグインを追加し、<notextile>:so {repository}/plugin/**/*.vim</notextile> する
 ### @volt plugconf ping@ を実行
 ### plugconf が存在するなら "Recommended plugconf found. Do you install it? [Y/n]:" とプロンプトを表示
 #### yes か空エンターが入力されたら
