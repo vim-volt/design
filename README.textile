@@ -102,15 +102,38 @@ h2. Ex コマンド
 ## ファイルのリストが 2個以上だったら選択肢を出す
 ### 選択したら開く
 
+* :VoltVersion
+** @volt query -l vim-volt/vim-volt@ と @volt version@ を実行し、vim-volt と go-volt のバージョンを表示する
+** このコマンドはもしインストールされてなければ volt コマンドをインストールするのにも使える
+*** 上記の動作はこのコマンドに限らず volt コマンドを実行する時に必ず行うが、このコマンドは表示以外何も行わないので lock.json の内容を変えずに go-volt をダウンロードできる
+
 h2. plugconf
 
-(TODO)
+Hooks や プラグインに対する設定を書く。
+
+(TODO: ユーザ用と plugcond-templates リポジトリからインストールされた plugconf は分けた方がいい？)
 
 hook については "dein.vim の hook":http://qiita.com/delphinus/items/cd221a450fd23506e81a も参考のこと。
 
+* post_install_hook
+** 初回インストール時に呼ばれる
+
+* pre_update_hook, post_update_hook
+** 初回インストール時やアップデート時に呼ばれる
+
+* filetype_hook
+** dein.vim の @on_ft@
+
+* excmd_hook
+** dein.vim の @on_cmd@
+
 h2. plugconf-templates リポジトリ
 
-(TODO)
+リポジトリのディレクトリ構成は以下の通り。
+
+* `/templates/{site}/{user}/{name}.vim`
+** plugconf ファイルが置かれる
+** template と言いつつ、今は GET してきたファイルをそのまま保存するだけ
 
 h2. profile 機能
 
@@ -125,12 +148,14 @@ h2. filetype や コマンド実行時に初めて Vim スクリプトファイ�
 dein.vim には @on_ft@ と @on_cmd@ があるようだ。
 
 * Q. plugconf と lock.json どちらに指定可能にするべきか？
-* A. plugconf の先頭行にマジックコメントとして書く
-* スクリプトファイルをなるべく読み込みたくないが、 @on_ft@ と @on_cmd@ は plugconf-templates リポジトリに集約させたい情報
-* よって vim-volt は plugconf を読み込む前に先頭のマジックコメントをパースする
-* これによって読み込み時は遅くなるが、スクリプトの読み込みは避けられる (スクリプトの読み込みは思ったよりメモリも使うし遅い)
-* 速度によってはメタデータとして lock.json か別の JSON  ファイルにキャッシュすることも考える
-
+* A1. plugconf の先頭行にマジックコメントとして書く
+** スクリプトファイルをなるべく読み込みたくないが、 @on_ft@ と @on_cmd@ は plugconf-templates リポジトリに集約させたい情報
+** よって vim-volt は plugconf を読み込む前に先頭のマジックコメントをパースする
+** これによって読み込み時は遅くなるが、スクリプトの読み込みは避けられる (スクリプトの読み込みは思ったよりメモリも使うし遅い)
+** 速度によってはメタデータとして lock.json か別の JSON  ファイルにキャッシュすることも考える
+** これだとパースが面倒なのでは？
+* A2. plugconf と同じディレクトリに拡張子を .json に変えて保存する
+** このファイルに書けるのは結果として静的な値を返す設定のみ (Vim script は書けない)
 
 h1. Go レイヤ (volt コマンド)
 
@@ -164,7 +189,7 @@ lock.json に書き込む時にはロックファイルを作り、自身の PID
 
 h2. サブコマンド
 
-* volt get [-u] {repository}
+* volt get [-l] [-u] [-f] {repository}
 ** リポジトリが指す Vim プラグインをインストール・アップデートする
 ** -l オプション：volt.lock に記載の Vim プラグインのリストを使用する (引数が指定された場合エラーとなる)
 ** -u オプション：既存の Vim プラグインをアップデート (初回インストール時は無視)
