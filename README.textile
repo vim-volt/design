@@ -147,7 +147,7 @@ h2. 設計
 
 h2. トランザクション
 
-トランザクションの直前にロックファイルの存在確認を行い、存在すれば "[ERROR] trx.lock exists. If process is already dead, please execute 'volt trx rm'" と表示する (これは「トランザクション」の動作には含まれない)。
+トランザクションの直前にロックファイルの存在確認を行い、存在すれば "[ERROR] trx.lock exists. If process is already dead, please remove '~/volt/trx.lock' manually" と表示する (これは「トランザクション」の動作には含まれない)。
 
 lock.json に書き込む時にはロックファイルを作り、自身の PID を書き込む。
 その後すぐにファイルの内容を読み出し、自身の PID が読み出せればトランザクションを開始してよい。
@@ -187,8 +187,8 @@ h2. サブコマンド
 #### リポジトリを一時ディレクトリに clone
 #### -u オプションが未指定か HEAD が違う場合は
 ##### リポジトリを一時ディレクトリから @$VOLTPATH/repos/{site}/{user}/{name}@ に移動
-##### @volt plugconf get@ を実行
-### リポジトリが移動され @volt plugconf get@ が実行された Vim プラグインを変更して lock.json に書き込む
+##### https://github.com/vim-volt/plugconf-templates のリポジトリから標準 plugconf を取得して plugconf のディレクトリに保存する
+### リポジトリが移動された Vim プラグインを変更して lock.json に書き込む
 ### アップグレードされたプラグインがあった場合、以下のように表示
 **** "[WARN] Reloading upgraded plugin is not supported."
 **** "[WARN] Please restart your Vim to reload the following plugins:"
@@ -208,24 +208,21 @@ h2. サブコマンド
 *** どうせ volt.vim からしか使わないのなら JSON 出力をデフォルトにしてもいいかもしれない
 ** -i オプション：インストールされている Vim プラグイン全てを対象とする
 
-* volt plugconf get {repository}
-** https://github.com/vim-volt/plugconf-templates のリポジトリから標準 plugconf を取得して plugconf のディレクトリに保存する
-** plugconf がすでにインストールされていたら "[WARN]" {plugconf} "was already installed ... skip" と表示
+* volt profile [get]
+## 現在の profile を表示
 
-* volt profile [{profile name}]
-## {profile name} が指定されたら
-### lock.json の active_profile をセットする
-### "[INFO] Please start Vim to load" {profile name} "profile" と表示
-## {profile name} が指定されなかったら現在の profile を表示
+* volt profile set {profile name}
+## lock.json の active_profile をセットする
+## "[INFO] Please start Vim to load" {profile name} "profile" と表示
 
-* volt trx rm [-f]
-## ロックファイルから内容を読み出す
-### ファイルが存在しないとのエラーが起きたら正常終了
-## "go-ps":https://github.com/mitchellh/go-ps ライブラリを用いてロックファイルに書き込まれたプロセスが生きているか確認する
-## 生きていて -f オプションが指定されなかった場合は
-### "[ERROR] The process is running. Please re-run with -f option if you want to remove 'trx.lock' forcefully" とエラーを表示
-## それ以外の場合は
-### trx.lock を削除する
+* volt profile init {profile name}
+** {profile name} を持った profile を作成
+
+* volt profile add {profile name} {repository}
+** {profile name} の profile に {repository} のプラグインを追加
+
+* volt profile rm {profile name} {repository}
+** {profile name} の profile から {repository} のプラグインを削除
 
 * volt version
 ** バージョン情報を出力
@@ -239,6 +236,8 @@ h2. $HOME/volt/lock.json の項目
 
 項目は glide.lock を参考にしている。
 
+* version
+** lock.json のフォーマットのバージョン
 * trx_id
 ** 前回行われたトランザクション (lock.json ファイル書き込み) の ID
 * active_profile
