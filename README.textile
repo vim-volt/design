@@ -82,19 +82,10 @@ h2. Ex コマンド
 
 * :VoltRm
 ## @volt rm@ を実行
-## リポジトリのディレクトリが存在する場合エラーを表示
-*** "[ERROR] Repository could not be deleted: " {repos}
 ## rtp から削除した Vim プラグインを削除
-## plugconf の rm フックを実行
 
 * :VoltQuery
 ## @volt query@ を実行
-
-* :VoltHelptags [-a] [{repository}] ({repository} の書式は @volt get@ と同じ)
-## -a オプションが指定されたら volt.lock から Vim プラグインのリストを取得する
-## -a オプションが指定されなかったら引数から Vim プラグインのリストを取得する
-## Vim プラグインのリストのそれぞれに対して
-### @:helptags {repository}@ を実行
 
 * :VoltProfile [{profile name}] (「profile 機能」を参照)
 ## @volt profile@ を実行
