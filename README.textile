@@ -110,8 +110,25 @@ h2. Ex コマンド
 h2. plugconf
 
 Hooks や プラグインに対する設定を書く。
+plugconf にはユーザ用とシステム用があり、それぞれ以下の場所にインストールされる。
 
-(TODO: ユーザ用と plugcond-templates リポジトリからインストールされた plugconf は分けた方がいい？)
+* ユーザ用 @$VOLTPATH/plugconf/user/{plugconf}@
+* システム用 @$VOLTPATH/plugconf/system/{plugconf}@
+
+@{plugconf}@ は以下のようなパスとなる。
+
+* @{site}/{user}/{name}.{json or vim}@
+** @{site}@: リポジトリのホストサイトのホスト名 (eg. github.com)
+** @{user}@: リポジトリのユーザ名
+** @{name}@: リポジトリ名
+
+システム用 plugconf は go-volt により常にインストール・削除される。
+ユーザ用 plugconf ではシステム用 plugconf の設定を継承したり上書きすることができる。
+継承するには @$VOLTPATH/plugconf/user/{site}/{user}/{name}.vim@ で @a:super()@ を実行する。
+上書きするにはそれを呼ばなければ良い。
+JSON ファイルの場合はユーザ用 plugconf は常にシステム用 plugconf を上書きするので、
+システム用 plugconf (@$VOLTPATH/plugconf/system/{site}/{user}/{name}.json@) をユーザ用 plugconf (@$VOLTPATH/plugconf/user/{site}/{user}/{name}.json@) にコピーしてから編集する (この操作は @:VoltEdit@ でシステム用 plugconf を読み込んだ後、編集しようとした時にプロンプトが出るので、Yes を選択すると自動的に @:saveas@ によってコピーされる)。
+JSON ファイルの場合も Vim script の場合も、ユーザ用 plugconf がなければシステム用 plugconf が自動的に読み込まれる。
 
 hook については "dein.vim の hook":http://qiita.com/delphinus/items/cd221a450fd23506e81a も参考のこと。
 
@@ -219,10 +236,9 @@ h2. サブコマンド
 **** "[WARN] Please restart your Vim to reload the following plugins:"
 **** アップグレードされたプラグインのリスト
 
-* volt rm [-p] {repository}
+* volt rm {repository}
 ** Vim プラグインをアンインストールする
 ** {repository} の書式は @volt get@ と同じ
-** -p オプション：plugconf も削除する (指定されなければ削除しない)
 
 * volt query [-j] [-i] [{repository}]
 ** Vim プラグインに関する情報を標準出力に出力する
