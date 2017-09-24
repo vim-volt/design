@@ -138,6 +138,10 @@ hook については "dein.vim の hook":http://qiita.com/delphinus/items/cd221a
 * pre_update_hook, post_update_hook
 ** 初回インストール時やアップデート時に呼ばれる
 
+* pre_load_hook, post_load_hook
+** Vim プラグインがロードされた時に呼ばれる
+** 「ロード」とは何を指す？ (TODO)
+
 * filetype_hook
 ** dein.vim の @on_ft@
 
