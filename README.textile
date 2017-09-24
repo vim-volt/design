@@ -206,11 +206,17 @@ lock.json に書き込む時にはロックファイルを作り、自身の PID
 
 h2. サブコマンド
 
-* volt get [-l] [-u] [-f] {repository}
+* volt get [-L {lock.json uri}] [-V {vimrc uri}] [-u] [-f] [-v] {repository}
 ** リポジトリが指す Vim プラグインをインストール・アップデートする
-** -l オプション：volt.lock に記載の Vim プラグインのリストを使用する (引数が指定された場合エラーとなる)
-** -u オプション：既存の Vim プラグインをアップデート (初回インストール時は無視)
+** -L オプション：https スキーマの URL かファイルパスで指定した volt.lock に記載の Vim プラグインのリストを使用する
+*** https スキーマの URL の場合リモートから GET して取得する
+*** このオプションが指定された場合、同時に引数が指定されるとエラーとなる
+** -V オプション：https スキーマの URL かファイルパスで指定した init.vim を @$VOLTPATH/rc/init.vim@ にインストールする
+*** もし @$VOLTPATH/rc/init.vim@ がすでに存在していたらエラーとなる
+** -u オプション：既存の Vim プラグインを git pull でアップデート (初回インストール時は無視)
+** -f オプション：リポジトリを削除して gir clone しなおす
 ** -l と -u が同時に指定された場合は全てのリポジトリをアップデート
+** -v オプション：git clone の出力を出力する
 ** repository の書式
 *** github.com/user/name -> https://github.com/user/name
 *** user/name -> https://github.com/user/name
