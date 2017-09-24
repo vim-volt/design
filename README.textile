@@ -249,6 +249,10 @@ h2. サブコマンド
 *** どうせ volt.vim からしか使わないのなら JSON 出力をデフォルトにしてもいいかもしれない
 ** -i オプション：インストールされている Vim プラグイン全てを対象とする
 
+* volt enable {repository}
+* volt disable {repository}
+** {repository} の `active` を true / false にする
+
 * volt profile [get]
 ## 現在の profile を表示
 
