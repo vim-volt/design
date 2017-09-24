@@ -302,8 +302,6 @@ h2. $HOME/volt/lock.json の項目
 ** 前回行われたトランザクション (lock.json ファイル書き込み) の ID
 * active_profile
 ** 現在アクティブな profile 名
-* load_init
-** @$VOLTPATH/rc/init.vim@ を読み込むかどうかのフラグ
 * repos[]
 ** Vim プラグイン情報のリスト
 * repos[]/path
@@ -319,5 +317,5 @@ h2. $HOME/volt/lock.json の項目
 ** profile 名
 * profiles[]/path
 ** 読み込む Vim プラグインのスキーマ (@https://@) なしの URL
-* profiles[]/load_init
-** @$VOLTPATH/rc/init.vim@ を読み込むかどうかのフラグ
+* profiles[]/rc[]
+** 起動時に読み込まれる @$VOLTPATH/rc/@ 以下の Vim script ファイル名を指定
