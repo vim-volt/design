@@ -260,14 +260,21 @@ h2. サブコマンド
 ## lock.json の active_profile をセットする
 ## "[INFO] Please start Vim to load" {profile name} "profile" と表示
 
-* volt profile init {profile name}
+* volt profile show {profile name}
+** {profile name} の情報を表示する
+
+* volt profile new {profile name}
 ** {profile name} を持った profile を作成
+** @active_profile@ は変更しない
 
-* volt profile add {profile name} {repository}
-** {profile name} の profile に {repository} のプラグインを追加
+* volt profile destroy {profile name}
+** {profile name} を持った profile を削除
 
-* volt profile rm {profile name} {repository}
-** {profile name} の profile から {repository} のプラグインを削除
+* volt profile add {profile name} {repository} [{repository2} ...]
+** {profile name} の profile に1つかそれ以上の {repository} を追加
+
+* volt profile rm {profile name} {repository} [{repository2} ...]
+** {profile name} の profile から1つかそれ以上の {repository} を削除
 
 * volt version
 ** バージョン情報を出力
