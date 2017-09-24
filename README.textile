@@ -249,9 +249,11 @@ h2. サブコマンド
 *** どうせ volt.vim からしか使わないのなら JSON 出力をデフォルトにしてもいいかもしれない
 ** -i オプション：インストールされている Vim プラグイン全てを対象とする
 
-* volt enable {repository}
-* volt disable {repository}
-** {repository} の `active` を true / false にする
+* volt enable {repository} [{repository2} ...]
+** 次のショートカット： @volt profile add {current profile} {repository} [{repository2} ...]@
+
+* volt disable {repository} [{repository2} ...]
+** 次のショートカット： @volt profile rm {current profile} {repository} [{repository2} ...]@
 
 * volt profile [get]
 ## 現在の profile を表示
@@ -302,12 +304,11 @@ h2. $HOME/volt/lock.json の項目
 ** スキーマ (@https://@) なしの URL (@$VOLTPATH/repos/{path}@ の path 部分とも言える)
 * repos[]/version
 ** Git のコミットハッシュ
-* repos[]/active
-** Vim プラグインを rtp に追加するか否かのフラグ
 * repos[]/trx_id
 ** 記載のトランザクションの時にインストールされたことを示す ID
 * profiles[]
 ** 「profile 機能」を参照
+** 初期値の default profile も例外なくこの配列の中に存在する
 * profiles[]/name
 ** profile 名
 * profiles[]/path
