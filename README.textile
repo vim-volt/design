@@ -117,7 +117,7 @@ plugconf にはユーザ用とシステム用があり、それぞれ以下の�
 
 @{plugconf}@ は以下のようなパスとなる。
 
-* @{site}/{user}/{name}.{json or vim}@
+* @{site}/{user}/{name}.vim@
 ** @{site}@: リポジトリのホストサイトのホスト名 (eg. github.com)
 ** @{user}@: リポジトリのユーザ名
 ** @{name}@: リポジトリ名
@@ -152,7 +152,7 @@ h2. plugconf-templates リポジトリ
 
 リポジトリのディレクトリ構成は以下の通り。
 
-* `/templates/{site}/{user}/{name}.{json or/and vim}`
+* `/templates/{site}/{user}/{name}.vim`
 ** plugconf ファイル (JSON または Vim script ファイル) が置かれる
 ** template と言いつつ、今は GET してきたファイルをそのまま保存するだけ
 
